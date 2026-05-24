@@ -1,0 +1,7 @@
+dependencies:
+- name: build-api
+  repository: oci://ghcr.io/builderhub
+  version: 0.1.0
+  condition: enabled
+  digest: sha256:DoZl4TgUGEGslz2t7uqg8PqVIKxIw6BkRqIpmwaCRO0=
+generated: "2026-05-24T21:08:33Z"

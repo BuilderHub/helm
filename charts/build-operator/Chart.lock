@@ -1,0 +1,7 @@
+dependencies:
+- name: build-operator
+  repository: oci://ghcr.io/builderhub
+  version: 0.1.0
+  condition: enabled
+  digest: sha256:be44DWEdBA5rfRYiX78iy6pxzOTT86Vxbi6xLCosfoM=
+generated: "2026-05-24T21:08:33Z"

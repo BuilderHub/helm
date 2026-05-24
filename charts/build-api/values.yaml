@@ -1,0 +1,50 @@
+enabled: true
+
+build-api:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/builderhub/build-api
+    pullPolicy: IfNotPresent
+    tag: ""
+
+  # Override for production via --set or a secrets backend.
+  database:
+    url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+
+  jwt:
+    secret: "dev-secret-change-in-production"
+
+  cors:
+    allowedOrigins: "http://localhost:3000,http://localhost:3001,http://build-console:80,https://console.builder-hub.dev"
+
+  service:
+    type: ClusterIP
+    httpPort: 8090
+    grpcPort: 9090
+    http:
+      port: 8090
+    grpc:
+      port: 9090
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
+  rbac:
+    create: true
+
+  ingress:
+    enabled: false
+
+  autoscaling:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi

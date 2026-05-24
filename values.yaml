@@ -1,0 +1,8 @@
+build-operator:
+  enabled: true
+
+build-api:
+  enabled: true
+
+build-console:
+  enabled: true

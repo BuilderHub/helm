@@ -1,0 +1,14 @@
+apiVersion: v2
+name: builderhub
+description: Deploy BuilderHub operator, API, and console together
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.25.0"
+keywords:
+  - builderhub
+  - buildkit
+  - platform
+home: https://builder-hub.dev
+sources:
+  - https://github.com/BuilderHub/helm

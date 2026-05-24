@@ -1,0 +1,10 @@
+apiVersion: v2
+name: build-operator
+description: BuilderHub build-operator (umbrella wrapper)
+type: application
+version: 0.1.0
+dependencies:
+  - name: build-operator
+    version: 0.1.0
+    repository: oci://ghcr.io/builderhub
+    condition: enabled
