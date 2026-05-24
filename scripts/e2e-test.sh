@@ -3,6 +3,9 @@
 set -euo pipefail
 
 E2E_NAMESPACE="${E2E_NAMESPACE:-builderhub-ci}"
+BUILD_API_DEPLOY="${BUILD_API_DEPLOY:-build-api}"
+BUILD_API_SVC="${BUILD_API_SVC:-build-api}"
+BUILD_OPERATOR_DEPLOY="${BUILD_OPERATOR_DEPLOY:-build-operator}"
 API_LOCAL_PORT="${API_LOCAL_PORT:-18090}"
 BUILDER_LOCAL_PORT="${BUILDER_LOCAL_PORT:-1234}"
 BUILDER_NAME="${BUILDER_NAME:-e2e-builder}"
@@ -47,15 +50,15 @@ api_base() {
 
 wait_platform() {
   log "Waiting for operator and API deployments"
-  kubectl -n "$E2E_NAMESPACE" wait --for=condition=available deploy/build-operator --timeout=600s
-  kubectl -n "$E2E_NAMESPACE" wait --for=condition=available deploy/builderhub-ci-build-api --timeout=600s
+  kubectl -n "$E2E_NAMESPACE" wait --for=condition=available "deploy/${BUILD_OPERATOR_DEPLOY}" --timeout=600s
+  kubectl -n "$E2E_NAMESPACE" wait --for=condition=available "deploy/${BUILD_API_DEPLOY}" --timeout=600s
 
   log "Waiting for database migration job"
   kubectl -n "$E2E_NAMESPACE" wait --for=condition=complete job \
     -l app.kubernetes.io/component=migrate --timeout=600s
 
   log "Port-forwarding build-api"
-  kubectl -n "$E2E_NAMESPACE" port-forward "svc/builderhub-ci-build-api" \
+  kubectl -n "$E2E_NAMESPACE" port-forward "svc/${BUILD_API_SVC}" \
     "${API_LOCAL_PORT}:8090" >/tmp/e2e-api-pf.log 2>&1 &
   pf_pids+=($!)
 
@@ -161,8 +164,8 @@ run_build() {
 on_failure_debug() {
   echo "--- debug: platform namespace ${E2E_NAMESPACE} ---" >&2
   kubectl -n "$E2E_NAMESPACE" get pods,svc,jobs 2>/dev/null || true
-  kubectl -n "$E2E_NAMESPACE" logs deploy/build-operator --tail=100 2>/dev/null || true
-  kubectl -n "$E2E_NAMESPACE" logs deploy/builderhub-ci-build-api --tail=100 2>/dev/null || true
+  kubectl -n "$E2E_NAMESPACE" logs "deploy/${BUILD_OPERATOR_DEPLOY}" --tail=100 2>/dev/null || true
+  kubectl -n "$E2E_NAMESPACE" logs "deploy/${BUILD_API_DEPLOY}" --tail=100 2>/dev/null || true
   if [[ -n "${ORG_ID:-}" ]]; then
     echo "--- debug: org namespace ${ORG_ID} ---" >&2
     kubectl -n "$ORG_ID" get pods,svc,events --sort-by=.lastTimestamp 2>/dev/null || true
