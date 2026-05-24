@@ -59,15 +59,16 @@ jobs:
           kubectl apply -f ci/postgres.yaml -n "${E2E_NAMESPACE}"
           kubectl -n "${E2E_NAMESPACE}" rollout status deploy/postgres --timeout=5m
 
-      - name: Apply builder templates
-        run: kubectl apply -f ci/builder-templates.yaml
-
       - name: Install umbrella chart
         run: |
           helm upgrade --install builderhub-ci . \
             -n "${E2E_NAMESPACE}" \
             -f ci/e2e-values.yaml \
+            --create-namespace \
             --wait --timeout 20m
+
+      - name: Apply builder templates
+        run: kubectl apply -f ci/builder-templates.yaml
 
       - name: Run e2e tests
         env:
