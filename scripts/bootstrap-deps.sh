@@ -26,6 +26,10 @@ for repo in "${REPOS[@]}"; do
     if grep -q 'runAsNonRoot: true' "$deploy" && ! grep -q 'runAsUser:' "$deploy"; then
       sed -i '/runAsNonRoot: true/a\            runAsUser: 65532' "$deploy"
     fi
+    # Upstream helm chart ships no RBAC; operator needs manager + leader-election roles.
+    cp "${ROOT}/ci/operator-rbac.yaml.tpl" "${chart_src}/templates/rbac.yaml"
+    mkdir -p "${chart_src}/crds"
+    cp "${tmp}/repo/config/crd/bases/"*.yaml "${chart_src}/crds/"
   fi
 
   if [[ "${repo}" == "build-api" ]]; then
