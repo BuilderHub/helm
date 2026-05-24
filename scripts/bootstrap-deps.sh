@@ -18,8 +18,11 @@ for repo in "${REPOS[@]}"; do
   rm -f "${chart_src}/.helmignore"
 
   if [[ "${repo}" == "build-operator" ]]; then
-    # GHCR image uses named user "nonroot"; KinD/kubelet requires numeric runAsUser with runAsNonRoot.
     deploy="${chart_src}/templates/deployment.yaml"
+    # | quote renders --leader-elect="true"; the manager flag parser rejects quoted booleans.
+    sed -i 's/--leader-elect={{ .Values.operator.leaderElection | quote }}/--leader-elect={{ .Values.operator.leaderElection }}/' \
+      "$deploy"
+    # GHCR image uses named user "nonroot"; KinD/kubelet requires numeric runAsUser with runAsNonRoot.
     if grep -q 'runAsNonRoot: true' "$deploy" && ! grep -q 'runAsUser:' "$deploy"; then
       sed -i '/runAsNonRoot: true/a\            runAsUser: 65532' "$deploy"
     fi
