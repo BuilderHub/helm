@@ -39,10 +39,14 @@ jobs:
         run: ./scripts/bootstrap-deps.sh
 
       - name: Helm lint (CI values)
-        run: helm lint . -f ci/e2e-values.yaml || true
+        run: |
+          helm lint charts/build-operator -f ci/operator-values.yaml || true
+          helm lint charts/build-api -f ci/api-values.yaml || true
 
       - name: Helm template (CI values)
-        run: helm template builderhub-ci . -f ci/e2e-values.yaml >/tmp/rendered.yaml
+        run: |
+          helm template build-operator charts/build-operator -f ci/operator-values.yaml >/tmp/operator.yaml
+          helm template build-api charts/build-api -f ci/api-values.yaml >/tmp/api.yaml
 
       - name: Create KinD cluster
         uses: helm/kind-action@v1.14.0
@@ -68,11 +72,13 @@ jobs:
           # vendored deps ignore enabled:false) and --wait does not stall.
           helm upgrade --install build-operator charts/build-operator \
             -n "${E2E_NAMESPACE}" \
-            -f ci/e2e-values.yaml \
+            -f ci/operator-values.yaml \
+            --set "build-operator.operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG}" \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
           helm upgrade --install build-api charts/build-api \
             -n "${E2E_NAMESPACE}" \
-            -f ci/e2e-values.yaml \
+            -f ci/api-values.yaml \
+            --set "build-api.image.tag=${BUILD_API_IMAGE_TAG}" \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
 
       - name: Debug platform namespace

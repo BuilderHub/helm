@@ -6,7 +6,7 @@ build-operator:
   operator:
     image:
       repository: ghcr.io/builderhub/build-operator
-      tag: ""
+      tag: "latest"
       pullPolicy: IfNotPresent
     replicaCount: 1
     leaderElection: true

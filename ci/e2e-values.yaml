@@ -1,5 +1,5 @@
-# Values for KinD PR e2e (helm install -f). Keep image tags in sync with
-# BUILD_*_IMAGE_TAG env in .github/workflows/on-pr.yaml.
+# Umbrella-style values (root `helm install builderhub . -f ci/e2e-values.yaml`).
+# PR e2e installs wrapper charts separately; use ci/operator-values.yaml and ci/api-values.yaml.
 build-console:
   enabled: false
 
