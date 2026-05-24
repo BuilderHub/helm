@@ -55,7 +55,8 @@ jobs:
       - name: Deploy Postgres
         run: |
           set -euo pipefail
-          kubectl apply -f ci/postgres.yaml -n "${E2E_NAMESPACE}" --create-namespace
+          kubectl create namespace "${E2E_NAMESPACE}"
+          kubectl apply -f ci/postgres.yaml -n "${E2E_NAMESPACE}"
           kubectl -n "${E2E_NAMESPACE}" rollout status deploy/postgres --timeout=5m
 
       - name: Apply builder templates
