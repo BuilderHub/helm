@@ -1,0 +1,31 @@
+# Values for KinD PR e2e (helm install -f). Keep image tags in sync with
+# BUILD_*_IMAGE_TAG env in .github/workflows/on-pr.yaml.
+build-console:
+  enabled: false
+
+build-operator:
+  enabled: true
+  build-operator:
+    installCRDs: true
+    operator:
+      image:
+        repository: ghcr.io/builderhub/build-operator
+        tag: latest
+        pullPolicy: IfNotPresent
+
+build-api:
+  enabled: true
+  build-api:
+    image:
+      repository: ghcr.io/builderhub/build-api
+      tag: latest
+      pullPolicy: IfNotPresent
+    database:
+      url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+    jwt:
+      secret: "ci-e2e-jwt-secret"
+    service:
+      type: ClusterIP
+      httpPort: 8090
+      http:
+        port: 8090

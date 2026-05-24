@@ -81,6 +81,17 @@ Publishing runs on GitHub release via [`.github/workflows/release.yaml`](.github
 
 Release tags should be semver with an optional `v` prefix (`v0.1.0` → chart version `0.1.0`).
 
+## PR checks
+
+Pull requests that touch chart or CI paths run [`.github/workflows/on-pr.yaml`](.github/workflows/on-pr.yaml):
+
+1. Bootstrap dependencies, `helm lint` / `helm template` with [`ci/e2e-values.yaml`](ci/e2e-values.yaml)
+2. Create a KinD cluster, deploy Postgres and builder templates from [`ci/`](ci/)
+3. `helm upgrade --install` the umbrella chart (operator + API; console disabled)
+4. [`scripts/e2e-test.sh`](scripts/e2e-test.sh) registers a user, creates an organization and ephemeral builder, then runs a minimal `buildctl` build
+
+CI manifests live under [`ci/`](ci/) (not `charts/ci/`) so Helm does not treat them as a subchart.
+
 ## Upstream chart publishing
 
 Wrapper `helm dependency update` and clean `enabled: false` handling expect application charts at:
