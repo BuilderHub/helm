@@ -43,6 +43,8 @@ for repo in "${REPOS[@]}"; do
     fi
     # Migration Job is a pre-install hook; ConfigMap must be a hook too or the job never starts.
     cp "${ROOT}/ci/api-migration-configmap.yaml.tpl" "${chart_src}/templates/migration-configmap.yaml"
+    # Upstream RBAC omits namespaces; CreateOrganization calls EnsureOrgNamespace.
+    cp "${ROOT}/ci/api-rbac.yaml.tpl" "${chart_src}/templates/rbac.yaml"
     helpers="${chart_src}/templates/_helpers.tpl"
     cat >> "${helpers}" <<'EOF'
 

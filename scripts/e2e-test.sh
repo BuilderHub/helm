@@ -53,9 +53,14 @@ wait_platform() {
   kubectl -n "$E2E_NAMESPACE" wait --for=condition=available "deploy/${BUILD_OPERATOR_DEPLOY}" --timeout=600s
   kubectl -n "$E2E_NAMESPACE" wait --for=condition=available "deploy/${BUILD_API_DEPLOY}" --timeout=600s
 
-  log "Waiting for database migration job"
-  kubectl -n "$E2E_NAMESPACE" wait --for=condition=complete job \
-    -l app.kubernetes.io/component=migrate --timeout=600s
+  # Helm pre-install hook runs migrations; hook-delete-policy removes the job on success.
+  if kubectl -n "$E2E_NAMESPACE" get job -l app.kubernetes.io/component=migrate -o name 2>/dev/null | grep -q .; then
+    log "Waiting for database migration job"
+    kubectl -n "$E2E_NAMESPACE" wait --for=condition=complete job \
+      -l app.kubernetes.io/component=migrate --timeout=600s
+  else
+    log "Migration job not present (already completed during helm install)"
+  fi
 
   log "Port-forwarding build-api"
   kubectl -n "$E2E_NAMESPACE" port-forward "svc/${BUILD_API_SVC}" \

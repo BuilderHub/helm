@@ -26,4 +26,8 @@ if [[ "${svc_count}" != "1" ]]; then
   exit 1
 fi
 
-echo "OK: migration hooks, 000001 migration, single Service manifest"
+helm template build-api charts/build-api -f ci/api-values.yaml \
+  --show-only charts/build-api/templates/rbac.yaml \
+  | grep -q 'namespaces' || { echo "RBAC missing namespaces permission" >&2; exit 1; }
+
+echo "OK: migration hooks, 000001 migration, single Service, namespace RBAC"
