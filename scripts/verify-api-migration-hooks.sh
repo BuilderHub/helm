@@ -30,4 +30,8 @@ helm template build-api charts/build-api -f ci/api-values.yaml \
   --show-only charts/build-api/templates/rbac.yaml \
   | grep -q 'namespaces' || { echo "RBAC missing namespaces permission" >&2; exit 1; }
 
-echo "OK: migration hooks, 000001 migration, single Service, namespace RBAC"
+helm template build-api charts/build-api -f ci/api-values.yaml \
+  --show-only charts/build-api/templates/deployment.yaml \
+  | grep -q 'serviceAccountName:' || { echo "deployment missing serviceAccountName" >&2; exit 1; }
+
+echo "OK: migration hooks, 000001 migration, single Service, namespace RBAC, API SA"

@@ -36,6 +36,11 @@ for repo in "${REPOS[@]}"; do
     deploy="${chart_src}/templates/deployment.yaml"
     # Upstream chart embeds a second Service in deployment.yaml; service.yaml already defines it.
     awk '/^---$/{exit} {print}' "$deploy" > "${deploy}.tmp" && mv "${deploy}.tmp" "$deploy"
+    # Chart creates RBAC for build-api SA but deployment never sets serviceAccountName (uses default).
+    if ! grep -q 'serviceAccountName:' "$deploy"; then
+      sed -i '/^      containers:$/i\      serviceAccountName: {{ include "build-api.serviceAccountName" . }}' \
+        "$deploy"
+    fi
     # Helm chart omits 000001; copy from app migrations so migrate can create schema.
     if [[ ! -f "${chart_src}/migrations/000001_init.up.sql" ]]; then
       cp "${tmp}/repo/migrations/000001_init.up.sql" "${chart_src}/migrations/"
