@@ -156,12 +156,30 @@ run_build() {
   mkdir -p "$ctx"
   printf 'FROM alpine\nRUN echo e2e-ok\n' >"$ctx/Dockerfile"
 
+  local build_log=/tmp/e2e-buildctl.log
   log "Running buildctl build"
+  # buildctl can exit 0 even when the solve fails; check output and exit code.
+  set +e
   buildctl --addr "tcp://127.0.0.1:${BUILDER_LOCAL_PORT}" build \
     --frontend dockerfile.v0 \
     --local context="$ctx" \
     --local dockerfile="$ctx" \
-    --opt filename=Dockerfile
+    --opt filename=Dockerfile 2>&1 | tee "$build_log"
+  local build_rc=${PIPESTATUS[0]}
+  set -e
+
+  if [[ "$build_rc" -ne 0 ]] \
+    || grep -qE '(^error: failed to solve:|ERROR: encountered unknown)' "$build_log"; then
+    echo "buildctl build failed (exit=${build_rc})" >&2
+    cat /tmp/e2e-builder-pf.log >&2 2>/dev/null || true
+    kubectl -n "$ORG_ID" get pods -o wide 2>/dev/null || true
+    local bpod
+    bpod="$(kubectl -n "$ORG_ID" get pods -o name 2>/dev/null | grep "builder-${BUILDER_NAME}" | head -1 || true)"
+    if [[ -n "$bpod" ]]; then
+      kubectl -n "$ORG_ID" logs "$bpod" -c buildkitd --tail=100 2>/dev/null || true
+    fi
+    return 1
+  fi
 
   log "Build succeeded"
 }
@@ -174,6 +192,18 @@ on_failure_debug() {
   if [[ -n "${ORG_ID:-}" ]]; then
     echo "--- debug: org namespace ${ORG_ID} ---" >&2
     kubectl -n "$ORG_ID" get pods,svc,events --sort-by=.lastTimestamp 2>/dev/null || true
+    kubectl -n "$ORG_ID" get configmap -o name 2>/dev/null | grep buildkitd | while read -r cm; do
+      kubectl -n "$ORG_ID" get "$cm" -o yaml 2>/dev/null || true
+    done
+    local bpod
+    bpod="$(kubectl -n "$ORG_ID" get pods -o name 2>/dev/null | grep "builder-${BUILDER_NAME}" | head -1 || true)"
+    if [[ -n "$bpod" ]]; then
+      kubectl -n "$ORG_ID" logs "$bpod" -c buildkitd --tail=100 2>/dev/null || true
+    fi
+  fi
+  if [[ -f /tmp/e2e-buildctl.log ]]; then
+    echo "--- debug: buildctl output ---" >&2
+    tail -80 /tmp/e2e-buildctl.log >&2 || true
   fi
 }
 
