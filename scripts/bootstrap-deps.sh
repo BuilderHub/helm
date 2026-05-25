@@ -33,6 +33,9 @@ for repo in "${REPOS[@]}"; do
   fi
 
   if [[ "${repo}" == "build-api" ]]; then
+    deploy="${chart_src}/templates/deployment.yaml"
+    # Upstream chart embeds a second Service in deployment.yaml; service.yaml already defines it.
+    awk '/^---$/{exit} {print}' "$deploy" > "${deploy}.tmp" && mv "${deploy}.tmp" "$deploy"
     # Helm chart omits 000001; copy from app migrations so migrate can create schema.
     if [[ ! -f "${chart_src}/migrations/000001_init.up.sql" ]]; then
       cp "${tmp}/repo/migrations/000001_init.up.sql" "${chart_src}/migrations/"

@@ -20,4 +20,10 @@ echo "$job" | grep -q 'hook-weight": "-5"' || { echo "Job missing hook-weight -5
 test -f charts/build-api/charts/build-api/migrations/000001_init.up.sql \
   || { echo "missing 000001_init.up.sql in chart" >&2; exit 1; }
 
-echo "OK: migration hooks and 000001 migration present"
+svc_count="$(helm template build-api charts/build-api -f ci/api-values.yaml 2>/dev/null | rg -c '^kind: Service$' || true)"
+if [[ "${svc_count}" != "1" ]]; then
+  echo "expected exactly one Service manifest, got ${svc_count}" >&2
+  exit 1
+fi
+
+echo "OK: migration hooks, 000001 migration, single Service manifest"

@@ -40,22 +40,11 @@ helm upgrade --install build-operator charts/build-operator \
   --set "build-operator.operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG:-latest}" \
   --wait --timeout "$HELM_WAIT"
 
-log "Run build-api migrations"
-helm template build-api charts/build-api -n "$NS" -f ci/api-values.yaml \
-  --set "build-api.image.tag=${BUILD_API_IMAGE_TAG:-latest}" \
-  --show-only charts/build-api/templates/migration-configmap.yaml | kubectl apply -n "$NS" -f -
-helm template build-api charts/build-api -n "$NS" -f ci/api-values.yaml \
-  --set "build-api.image.tag=${BUILD_API_IMAGE_TAG:-latest}" \
-  --show-only charts/build-api/templates/migration-job.yaml | kubectl apply -n "$NS" -f -
-kubectl -n "$NS" wait --for=condition=complete job/build-api-migrate --timeout=5m
-kubectl -n "$NS" logs job/build-api-migrate --tail=50
-
-log "Install build-api (skip hooks; migration already done)"
+log "Install build-api"
 helm upgrade --install build-api charts/build-api \
   -n "$NS" \
   -f ci/api-values.yaml \
   --set "build-api.image.tag=${BUILD_API_IMAGE_TAG:-latest}" \
-  --no-hooks \
   --wait --timeout "$HELM_WAIT"
 
 log "Status"
