@@ -1,0 +1,59 @@
+# Postgres for PR e2e (KinD). Credentials match build-api chart defaults.
+# Uses emptyDir instead of PVC so CI does not depend on a StorageClass.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_USER
+              value: builderhub
+            - name: POSTGRES_PASSWORD
+              value: builderhub123
+            - name: POSTGRES_DB
+              value: builderhub
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, builderhub]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: [pg_isready, -U, builderhub]
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: postgres

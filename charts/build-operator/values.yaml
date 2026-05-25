@@ -1,0 +1,25 @@
+enabled: true
+
+build-operator:
+  installCRDs: true
+
+  operator:
+    image:
+      repository: ghcr.io/builderhub/build-operator
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    replicaCount: 1
+    leaderElection: true
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+
+  serviceAccount:
+    create: true
+
+  rbac:
+    create: true

@@ -1,0 +1,31 @@
+# Umbrella-style values (root `helm install builderhub . -f ci/e2e-values.yaml`).
+# PR e2e installs wrapper charts separately; use ci/operator-values.yaml and ci/api-values.yaml.
+build-console:
+  enabled: false
+
+build-operator:
+  enabled: true
+  build-operator:
+    installCRDs: true
+    operator:
+      image:
+        repository: ghcr.io/builderhub/build-operator
+        tag: latest
+        pullPolicy: IfNotPresent
+
+build-api:
+  enabled: true
+  build-api:
+    image:
+      repository: ghcr.io/builderhub/build-api
+      tag: latest
+      pullPolicy: IfNotPresent
+    database:
+      url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+    jwt:
+      secret: "ci-e2e-jwt-secret"
+    service:
+      type: ClusterIP
+      httpPort: 8090
+      http:
+        port: 8090

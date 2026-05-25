@@ -1,0 +1,10 @@
+apiVersion: v2
+name: build-console
+description: BuilderHub build-console (umbrella wrapper)
+type: application
+version: 0.1.0
+dependencies:
+  - name: build-console
+    version: 0.1.0
+    repository: oci://ghcr.io/builderhub
+    condition: enabled

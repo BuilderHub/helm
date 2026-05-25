@@ -1,0 +1,7 @@
+dependencies:
+- name: build-console
+  repository: oci://ghcr.io/builderhub
+  version: 0.1.0
+  condition: enabled
+  digest: sha256:qu3JwEXdyt5jY2z84LnMsMM0kU2Ba9EXu6tVl2nFtIo=
+generated: "2026-05-25T20:13:00Z"

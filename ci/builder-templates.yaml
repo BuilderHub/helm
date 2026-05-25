@@ -1,0 +1,91 @@
+# Cluster-scoped builder templates (from build-operator config/samples).
+# Required before CreateBuilder via build-api (templateRef e.g. builder-small).
+# buildkitdToml overrides operator default (broken docker.io mirror -> HTML errors).
+---
+apiVersion: builder-template.builder-hub.dev/v1alpha1
+kind: BuildkitBuilderTemplate
+metadata:
+  name: builder-small
+spec:
+  buildkitImage: moby/buildkit:master-rootless
+  rootless: true
+  buildkitdToml: |
+    [grpc]
+      address = [ "tcp://0.0.0.0:1234" ]
+    [worker.containerd]
+      enabled = false
+    [worker.oci]
+      enabled = true
+  cacheConfig:
+    type: pvc
+    pvc:
+      storageClassName: ""
+      size: "10Gi"
+      accessModes:
+        - ReadWriteOnce
+---
+apiVersion: builder-template.builder-hub.dev/v1alpha1
+kind: BuildkitBuilderTemplate
+metadata:
+  name: builder-medium
+spec:
+  buildkitImage: moby/buildkit:master-rootless
+  rootless: true
+  buildkitdToml: |
+    [grpc]
+      address = [ "tcp://0.0.0.0:1234" ]
+    [worker.containerd]
+      enabled = false
+    [worker.oci]
+      enabled = true
+  cacheConfig:
+    type: pvc
+    pvc:
+      storageClassName: ""
+      size: "25Gi"
+      accessModes:
+        - ReadWriteOnce
+---
+apiVersion: builder-template.builder-hub.dev/v1alpha1
+kind: BuildkitBuilderTemplate
+metadata:
+  name: builder-large
+spec:
+  buildkitImage: moby/buildkit:master-rootless
+  rootless: true
+  buildkitdToml: |
+    [grpc]
+      address = [ "tcp://0.0.0.0:1234" ]
+    [worker.containerd]
+      enabled = false
+    [worker.oci]
+      enabled = true
+  cacheConfig:
+    type: pvc
+    pvc:
+      storageClassName: ""
+      size: "50Gi"
+      accessModes:
+        - ReadWriteOnce
+---
+apiVersion: builder-template.builder-hub.dev/v1alpha1
+kind: BuildkitBuilderTemplate
+metadata:
+  name: builder-xlarge
+spec:
+  buildkitImage: moby/buildkit:master-rootless
+  rootless: true
+  buildkitdToml: |
+    [grpc]
+      address = [ "tcp://0.0.0.0:1234" ]
+    [worker.containerd]
+      enabled = false
+    [worker.oci]
+      enabled = true
+  cacheConfig:
+    type: pvc
+    pvc:
+      storageClassName: ""
+      size: "100Gi"
+      accessModes:
+        - ReadWriteOnce

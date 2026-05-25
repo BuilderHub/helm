@@ -1,0 +1,10 @@
+apiVersion: v2
+name: build-api
+description: BuilderHub build-api (umbrella wrapper)
+type: application
+version: 0.1.0
+dependencies:
+  - name: build-api
+    version: 0.1.0
+    repository: oci://ghcr.io/builderhub
+    condition: enabled

@@ -1,0 +1,9 @@
+# VCS
+.git/
+.gitignore
+
+# CI / automation
+.github/
+
+# Dev tooling
+Makefile
