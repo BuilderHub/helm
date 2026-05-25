@@ -36,7 +36,9 @@ jobs:
           version: v3.20.2
 
       - name: Bootstrap chart dependencies
-        run: ./scripts/bootstrap-deps.sh
+        run: |
+          ./scripts/bootstrap-deps.sh
+          ./scripts/verify-api-migration-hooks.sh
 
       - name: Helm lint (CI values)
         run: |
@@ -75,10 +77,28 @@ jobs:
             -f ci/operator-values.yaml \
             --set "build-operator.operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG}" \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
+          # Migration Job is a pre-install hook; ConfigMap must exist first (hook-weight -10).
+          helm template build-api charts/build-api \
+            -n "${E2E_NAMESPACE}" \
+            -f ci/api-values.yaml \
+            --set "build-api.image.tag=${BUILD_API_IMAGE_TAG}" \
+            --show-only charts/build-api/templates/migration-configmap.yaml \
+            | kubectl apply -n "${E2E_NAMESPACE}" -f -
+          helm template build-api charts/build-api \
+            -n "${E2E_NAMESPACE}" \
+            -f ci/api-values.yaml \
+            --set "build-api.image.tag=${BUILD_API_IMAGE_TAG}" \
+            --show-only charts/build-api/templates/migration-job.yaml \
+            | kubectl apply -n "${E2E_NAMESPACE}" -f -
+          kubectl -n "${E2E_NAMESPACE}" wait --for=condition=complete job/build-api-migrate \
+            --timeout=5m
+          kubectl -n "${E2E_NAMESPACE}" logs job/build-api-migrate --tail=50
+
           helm upgrade --install build-api charts/build-api \
             -n "${E2E_NAMESPACE}" \
             -f ci/api-values.yaml \
             --set "build-api.image.tag=${BUILD_API_IMAGE_TAG}" \
+            --no-hooks \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
 
       - name: Debug platform namespace

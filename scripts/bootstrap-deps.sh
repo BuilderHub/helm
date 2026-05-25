@@ -33,6 +33,13 @@ for repo in "${REPOS[@]}"; do
   fi
 
   if [[ "${repo}" == "build-api" ]]; then
+    # Helm chart omits 000001; copy from app migrations so migrate can create schema.
+    if [[ ! -f "${chart_src}/migrations/000001_init.up.sql" ]]; then
+      cp "${tmp}/repo/migrations/000001_init.up.sql" "${chart_src}/migrations/"
+      cp "${tmp}/repo/migrations/000001_init.down.sql" "${chart_src}/migrations/" 2>/dev/null || true
+    fi
+    # Migration Job is a pre-install hook; ConfigMap must be a hook too or the job never starts.
+    cp "${ROOT}/ci/api-migration-configmap.yaml.tpl" "${chart_src}/templates/migration-configmap.yaml"
     helpers="${chart_src}/templates/_helpers.tpl"
     cat >> "${helpers}" <<'EOF'
 
