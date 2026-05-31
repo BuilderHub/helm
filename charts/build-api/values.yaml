@@ -13,6 +13,9 @@ migrate:
 
 database:
   url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+  # When set, DATABASE_URL is read from this Secret (e.g. CNPG pgsql-app) instead of database.url.
+  existingSecret: ""
+  existingSecretKey: uri
 
 jwt:
   secret: "dev-secret-change-in-production"

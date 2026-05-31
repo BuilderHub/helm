@@ -26,8 +26,16 @@ spec:
           image: {{ include "build-api.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            {{- if .Values.database.existingSecret }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretKey }}
+            {{- else }}
             - name: DATABASE_URL
               value: {{ .Values.database.url | quote }}
+            {{- end }}
             - name: JWT_SECRET
               value: {{ .Values.jwt.secret | quote }}
             - name: CORS_ALLOWED_ORIGINS

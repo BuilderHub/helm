@@ -22,7 +22,17 @@ spec:
         - name: migrate
           image: "{{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}"
           imagePullPolicy: {{ .Values.migrate.image.pullPolicy }}
+          {{- if .Values.database.existingSecret }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: {{ .Values.database.existingSecretKey }}
+          command: ["sh", "-c", "migrate -path /migrations -database \"$DATABASE_URL\" up"]
+          {{- else }}
           command: ["migrate", "-path", "/migrations", "-database", "{{ .Values.database.url }}", "up"]
+          {{- end }}
           volumeMounts:
             - name: migrations
               mountPath: /migrations
