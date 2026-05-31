@@ -24,11 +24,10 @@ jobs:
         with:
           version: v3.20.2
 
-      - name: Bootstrap chart dependencies
-        run: ./scripts/bootstrap-deps.sh
-
       - name: Helm lint
-        run: helm lint . || true
+        run: |
+          ./scripts/verify-api-migration-hooks.sh
+          helm lint .
 
       - name: Helm template (smoke test)
         run: helm template builderhub . --namespace builderhub

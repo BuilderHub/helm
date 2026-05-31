@@ -1,8 +1,103 @@
 build-operator:
-  enabled: true
+  installCRDs: true
+  operator:
+    image:
+      repository: ghcr.io/builderhub/build-operator
+      tag: latest
+      pullPolicy: IfNotPresent
+    replicaCount: 1
+    leaderElection: true
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+    securityContext:
+      runAsUser: 65532
+  serviceAccount:
+    create: true
+  rbac:
+    create: true
+  nodeSelector: {}
 
 build-api:
-  enabled: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/builderhub/build-api
+    pullPolicy: IfNotPresent
+    tag: ""
+  database:
+    url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+  jwt:
+    secret: "dev-secret-change-in-production"
+  cors:
+    allowedOrigins: "http://localhost:3000,http://localhost:3001,http://build-console:80,https://console.builder-hub.dev"
+  service:
+    type: ClusterIP
+    httpPort: 8090
+    grpcPort: 9090
+    annotations: {}
+  serviceAccount:
+    create: true
+    automount: true
+  rbac:
+    create: true
+  ingress:
+    enabled: false
+  autoscaling:
+    enabled: false
+  nodeSelector: {}
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
 
 build-console:
-  enabled: true
+  replicaCount: 2
+  image:
+    repository: ghcr.io/builderhub/build-console
+    pullPolicy: IfNotPresent
+    tag: ""
+  serviceAccount:
+    create: true
+    automount: true
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: false
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 3001
+  ingress:
+    enabled: false
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  autoscaling:
+    enabled: false
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: PORT
+      value: "3001"
+    - name: HOSTNAME
+      value: "0.0.0.0"
+  nodeSelector: {}

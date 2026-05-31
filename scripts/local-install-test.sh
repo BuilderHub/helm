@@ -19,8 +19,6 @@ need kind
 need kubectl
 
 cd "$ROOT"
-log "Bootstrap dependencies"
-./scripts/bootstrap-deps.sh
 
 if ! kind get clusters 2>/dev/null | grep -qx "$CLUSTER"; then
   log "Creating KinD cluster ${CLUSTER}"
@@ -37,14 +35,14 @@ log "Install build-operator"
 helm upgrade --install build-operator charts/build-operator \
   -n "$NS" \
   -f ci/operator-values.yaml \
-  --set "build-operator.operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG:-latest}" \
+  --set "operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG:-latest}" \
   --wait --timeout "$HELM_WAIT"
 
 log "Install build-api"
 helm upgrade --install build-api charts/build-api \
   -n "$NS" \
   -f ci/api-values.yaml \
-  --set "build-api.image.tag=${BUILD_API_IMAGE_TAG:-latest}" \
+  --set "image.tag=${BUILD_API_IMAGE_TAG:-latest}" \
   --wait --timeout "$HELM_WAIT"
 
 log "Status"

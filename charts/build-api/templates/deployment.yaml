@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "build-api.fullname" . }}
+  labels:
+    {{- include "build-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "build-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "build-api.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "build-api.serviceAccountName" . }}
+      {{- end }}
+      containers:
+        - name: build-api
+          image: {{ include "build-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DATABASE_URL
+              value: {{ .Values.database.url | quote }}
+            - name: JWT_SECRET
+              value: {{ .Values.jwt.secret | quote }}
+            - name: CORS_ALLOWED_ORIGINS
+              value: {{ .Values.cors.allowedOrigins | quote }}
+            - name: HTTP_ADDR
+              value: ":{{ .Values.service.httpPort }}"
+            - name: GRPC_ADDR
+              value: ":{{ .Values.service.grpcPort }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.httpPort }}
+            - name: grpc
+              containerPort: {{ .Values.service.grpcPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

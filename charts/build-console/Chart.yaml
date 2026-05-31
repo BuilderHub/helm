@@ -1,10 +1,16 @@
 apiVersion: v2
 name: build-console
-description: BuilderHub build-console (umbrella wrapper)
+description: A Helm chart for BuilderHub Console - Builder & Organization Management
 type: application
 version: 0.1.0
-dependencies:
-  - name: build-console
-    version: 0.1.0
-    repository: oci://ghcr.io/builderhub
-    condition: enabled
+appVersion: "0.1.0"
+keywords:
+  - builderhub
+  - console
+  - nextjs
+  - admin
+home: https://github.com/builderhub/build-console
+sources:
+  - https://github.com/builderhub/build-console
+maintainers:
+  - name: BuilderHub Team

@@ -12,3 +12,10 @@ keywords:
 home: https://builder-hub.dev
 sources:
   - https://github.com/BuilderHub/helm
+dependencies:
+  - name: build-operator
+    version: 0.1.0
+  - name: build-api
+    version: 0.1.0
+  - name: build-console
+    version: 0.1.0

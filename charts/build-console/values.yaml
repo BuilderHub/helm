@@ -1,54 +1,112 @@
-enabled: true
+replicaCount: 2
 
-build-console:
-  replicaCount: 2
+image:
+  repository: ghcr.io/builderhub/build-console
+  pullPolicy: IfNotPresent
+  tag: ""  # Overrides the image tag whose default is the chart appVersion
 
-  image:
-    repository: ghcr.io/builderhub/build-console
-    pullPolicy: IfNotPresent
-    tag: ""
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-  serviceAccount:
-    create: true
-    automount: true
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
 
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    fsGroup: 1000
-    seccompProfile:
-      type: RuntimeDefault
+podAnnotations: {}
+podLabels: {}
 
-  securityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    readOnlyRootFilesystem: false
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
 
-  service:
-    type: ClusterIP
-    port: 80
-    targetPort: 3001
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
 
-  ingress:
-    enabled: false
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3001
+  annotations: {}
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: console.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: build-console-tls
+  #    hosts:
+  #      - console.example.com
 
-  autoscaling:
-    enabled: false
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
 
-  env:
-    - name: NODE_ENV
-      value: "production"
-    - name: PORT
-      value: "3001"
-    - name: HOSTNAME
-      value: "0.0.0.0"
+livenessProbe:
+  httpGet:
+    path: /login
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /login
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: PORT
+    value: "3001"
+  - name: HOSTNAME
+    value: "0.0.0.0"
+
+envFrom: []
+# - configMapRef:
+#     name: build-console-config
+# - secretRef:
+#     name: build-console-secrets

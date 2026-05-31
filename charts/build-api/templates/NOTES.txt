@@ -1,0 +1,4 @@
+Build API has been deployed.
+
+HTTP: {{ include "build-api.fullname" . }}:{{ .Values.service.httpPort }}
+gRPC: {{ include "build-api.fullname" . }}:{{ .Values.service.grpcPort }}

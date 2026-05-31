@@ -1,25 +1,45 @@
-enabled: true
+# BuilderHub BuildKit Operator Helm values
 
-build-operator:
-  installCRDs: true
+operator:
+  image:
+    repository: ghcr.io/builderhub/build-operator
+    tag: latest
+    pullPolicy: IfNotPresent
 
-  operator:
-    image:
-      repository: ghcr.io/builderhub/build-operator
-      tag: "latest"
-      pullPolicy: IfNotPresent
-    replicaCount: 1
-    leaderElection: true
-    resources:
-      limits:
-        cpu: 500m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 64Mi
+  replicaCount: 1
 
-  serviceAccount:
-    create: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
 
-  rbac:
-    create: true
+  # Leader election for HA
+  leaderElection: true
+
+  securityContext:
+    runAsUser: 65532
+
+# Install CRDs (set false if managing CRDs separately)
+installCRDs: true
+
+# Namespace for the operator
+namespaceOverride: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# ServiceAccount
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# RBAC
+rbac:
+  create: true

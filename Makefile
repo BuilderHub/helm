@@ -1,18 +1,16 @@
-.PHONY: bootstrap-deps deps lint template
-
-WRAPPERS := build-operator build-api build-console
-
-bootstrap-deps:
-	@./scripts/bootstrap-deps.sh
+.PHONY: deps lint template verify
 
 deps:
-	@for chart in $(WRAPPERS); do \
-		echo "Updating dependencies for $$chart..."; \
-		helm dependency update "charts/$$chart"; \
-	done
+	@echo "Chart sources live in charts/; no dependency fetch required."
 
-lint: bootstrap-deps
+lint:
 	helm lint .
+	helm lint charts/build-operator -f ci/operator-values.yaml
+	helm lint charts/build-api -f ci/api-values.yaml
+	helm lint charts/build-console
 
-template: bootstrap-deps
+template:
 	helm template builderhub . --namespace builderhub
+
+verify:
+	./scripts/verify-api-migration-hooks.sh

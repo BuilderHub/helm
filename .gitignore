@@ -1,3 +1,1 @@
-charts/*/charts/
-charts/*/*.tgz
-*.tgz
+# Packaged subchart archives under charts/ are committed for Flux GitRepository installs.

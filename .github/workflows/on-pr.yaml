@@ -35,20 +35,21 @@ jobs:
         with:
           version: v3.20.2
 
-      - name: Bootstrap chart dependencies
-        run: |
-          ./scripts/bootstrap-deps.sh
-          ./scripts/verify-api-migration-hooks.sh
+      - name: Verify chart sources
+        run: ./scripts/verify-api-migration-hooks.sh
 
-      - name: Helm lint (CI values)
+      - name: Helm lint
         run: |
-          helm lint charts/build-operator -f ci/operator-values.yaml || true
-          helm lint charts/build-api -f ci/api-values.yaml || true
+          helm lint .
+          helm lint charts/build-operator -f ci/operator-values.yaml
+          helm lint charts/build-api -f ci/api-values.yaml
+          helm lint charts/build-console
 
       - name: Helm template (CI values)
         run: |
           helm template build-operator charts/build-operator -f ci/operator-values.yaml >/tmp/operator.yaml
           helm template build-api charts/build-api -f ci/api-values.yaml >/tmp/api.yaml
+          helm template builderhub . --namespace builderhub >/tmp/umbrella.yaml
 
       - name: Create KinD cluster
         uses: helm/kind-action@v1.14.0
@@ -70,17 +71,15 @@ jobs:
         id: helm-install
         run: |
           set -euo pipefail
-          # Install wrappers separately so build-console is not deployed (umbrella
-          # vendored deps ignore enabled:false) and --wait does not stall.
           helm upgrade --install build-operator charts/build-operator \
             -n "${E2E_NAMESPACE}" \
             -f ci/operator-values.yaml \
-            --set "build-operator.operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG}" \
+            --set "operator.image.tag=${BUILD_OPERATOR_IMAGE_TAG}" \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
           helm upgrade --install build-api charts/build-api \
             -n "${E2E_NAMESPACE}" \
             -f ci/api-values.yaml \
-            --set "build-api.image.tag=${BUILD_API_IMAGE_TAG}" \
+            --set "image.tag=${BUILD_API_IMAGE_TAG}" \
             --wait --timeout "${HELM_WAIT_TIMEOUT}"
 
       - name: Debug platform namespace

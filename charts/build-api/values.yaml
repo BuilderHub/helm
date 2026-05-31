@@ -1,50 +1,57 @@
-enabled: true
+replicaCount: 1
 
-build-api:
-  replicaCount: 1
+image:
+  repository: ghcr.io/builderhub/build-api
+  pullPolicy: IfNotPresent
+  tag: ""
 
+migrate:
   image:
-    repository: ghcr.io/builderhub/build-api
+    repository: migrate/migrate
+    tag: v4.17.0
     pullPolicy: IfNotPresent
-    tag: ""
 
-  # Override for production via --set or a secrets backend.
-  database:
-    url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
+database:
+  url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
 
-  jwt:
-    secret: "dev-secret-change-in-production"
+jwt:
+  secret: "dev-secret-change-in-production"
 
-  cors:
-    allowedOrigins: "http://localhost:3000,http://localhost:3001,http://build-console:80,https://console.builder-hub.dev"
+cors:
+  allowedOrigins: "http://localhost:3000,http://localhost:3001,https://console.builder-hub.dev"
 
-  service:
-    type: ClusterIP
-    httpPort: 8090
-    grpcPort: 9090
-    http:
-      port: 8090
-    grpc:
-      port: 9090
+service:
+  type: ClusterIP
+  httpPort: 8090
+  grpcPort: 9090
+  annotations: {}
 
-  serviceAccount:
-    create: true
-    annotations: {}
-    name: ""
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
 
-  rbac:
-    create: true
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
 
-  ingress:
-    enabled: false
+nodeSelector: {}
 
-  autoscaling:
-    enabled: false
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
 
-  resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
-    limits:
-      cpu: 500m
-      memory: 256Mi
+serviceAccount:
+  create: true
+  automount: true
+
+rbac:
+  create: true

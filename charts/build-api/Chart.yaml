@@ -1,10 +1,12 @@
 apiVersion: v2
 name: build-api
-description: BuilderHub build-api (umbrella wrapper)
+description: Helm chart for BuilderHub Build API - gRPC/HTTP gateway
 type: application
 version: 0.1.0
-dependencies:
-  - name: build-api
-    version: 0.1.0
-    repository: oci://ghcr.io/builderhub
-    condition: enabled
+appVersion: "0.1.0"
+keywords:
+  - builderhub
+  - api
+  - grpc
+maintainers:
+  - name: BuilderHub Team
