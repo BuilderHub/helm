@@ -40,15 +40,13 @@ spec:
         - name: http
           containerPort: {{ .Values.service.targetPort }}
           protocol: TCP
-        {{- if or .Values.env .Values.api.buildApiUrl }}
+        {{- $env := .Values.env | default list }}
+        {{- if .Values.api.buildApiUrl }}
+        {{- $env = append $env (dict "name" "BUILD_API_URL" "value" .Values.api.buildApiUrl) }}
+        {{- end }}
+        {{- with $env }}
         env:
-          {{- with .Values.env }}
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- if .Values.api.buildApiUrl }}
-          - name: BUILD_API_URL
-            value: {{ .Values.api.buildApiUrl | quote }}
-          {{- end }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- with .Values.envFrom }}
         envFrom:
