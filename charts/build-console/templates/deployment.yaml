@@ -40,9 +40,15 @@ spec:
         - name: http
           containerPort: {{ .Values.service.targetPort }}
           protocol: TCP
-        {{- with .Values.env }}
+        {{- if or .Values.env .Values.api.buildApiUrl }}
         env:
+          {{- with .Values.env }}
           {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.api.buildApiUrl }}
+          - name: BUILD_API_URL
+            value: {{ .Values.api.buildApiUrl | quote }}
+          {{- end }}
         {{- end }}
         {{- with .Values.envFrom }}
         envFrom:

@@ -105,6 +105,10 @@ env:
   - name: HOSTNAME
     value: "0.0.0.0"
 
+# Internal build-api URL for Next.js server-side /v1 rewrites (browser uses same-origin).
+api:
+  buildApiUrl: ""
+
 envFrom: []
 # - configMapRef:
 #     name: build-console-config

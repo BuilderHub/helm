@@ -100,4 +100,6 @@ build-console:
       value: "3001"
     - name: HOSTNAME
       value: "0.0.0.0"
+  api:
+    buildApiUrl: "http://builderhub-build-api:8090"
   nodeSelector: {}
