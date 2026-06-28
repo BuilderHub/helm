@@ -44,6 +44,10 @@ spec:
               value: ":{{ .Values.service.httpPort }}"
             - name: GRPC_ADDR
               value: ":{{ .Values.service.grpcPort }}"
+            {{- if .Values.builderBaseDomain }}
+            - name: BUILDER_BASE_DOMAIN
+              value: {{ .Values.builderBaseDomain | quote }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.httpPort }}
