@@ -34,6 +34,8 @@ build-api:
     secret: "dev-secret-change-in-production"
   cors:
     allowedOrigins: "http://localhost:3000,http://localhost:3001,http://build-console:80,https://console.builder-hub.dev"
+  # Set to the public DNS suffix (e.g. builder-hub.dev) to expose builders via ingress.
+  builderBaseDomain: ""
   service:
     type: ClusterIP
     httpPort: 8090

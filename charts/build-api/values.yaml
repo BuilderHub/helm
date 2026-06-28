@@ -23,6 +23,10 @@ jwt:
 cors:
   allowedOrigins: "http://localhost:3000,http://localhost:3001,https://console.builder-hub.dev"
 
+# Public DNS suffix used to expose builders at <builder>-<arch>.<org>.<builderBaseDomain>.
+# Empty disables internet exposure (builders fall back to in-cluster/NodePort only).
+builderBaseDomain: ""
+
 service:
   type: ClusterIP
   httpPort: 8090
