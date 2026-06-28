@@ -3,7 +3,7 @@ build-operator:
   operator:
     image:
       repository: ghcr.io/builderhub/build-operator
-      tag: latest
+      tag: d5e94efb7668ff4847da94921020791cd2622852
       pullPolicy: IfNotPresent
     replicaCount: 1
     leaderElection: true
@@ -27,7 +27,7 @@ build-api:
   image:
     repository: ghcr.io/builderhub/build-api
     pullPolicy: IfNotPresent
-    tag: ""
+    tag: "032be5f308e65710d6f463f7da8b7e086536284a"
   database:
     url: "postgres://builderhub:builderhub123@postgres:5432/builderhub?sslmode=disable"
   jwt:
@@ -64,7 +64,7 @@ build-console:
   image:
     repository: ghcr.io/builderhub/build-console
     pullPolicy: IfNotPresent
-    tag: ""
+    tag: "4a70899143a04577f0fd47d5e5048f2733141eb8"
   serviceAccount:
     create: true
     automount: true
