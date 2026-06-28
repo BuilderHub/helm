@@ -9,6 +9,8 @@ BUILD_OPERATOR_DEPLOY="${BUILD_OPERATOR_DEPLOY:-build-operator}"
 API_LOCAL_PORT="${API_LOCAL_PORT:-18090}"
 BUILDER_LOCAL_PORT="${BUILDER_LOCAL_PORT:-1234}"
 BUILDER_NAME="${BUILDER_NAME:-e2e-builder}"
+BUILDER_MODE="${BUILDER_MODE:-sleepy}"
+BUILDER_TEMPLATE="${BUILDER_TEMPLATE:-builder-small}"
 BUILDKIT_VERSION="${BUILDKIT_VERSION:-v0.20.2}"
 
 pf_pids=()
@@ -110,11 +112,11 @@ register_and_org() {
 }
 
 create_builder_and_wait() {
-  log "Creating ephemeral builder ${BUILDER_NAME}"
+  log "Creating ${BUILDER_MODE} builder ${BUILDER_NAME}"
   curl -sfS -X POST "$(api_base)/v1/namespaces/${ORG_ID}/builders" \
     -H "Authorization: Bearer ${ACCESS_TOKEN}" \
     -H 'Content-Type: application/json' \
-    -d "{\"name\":\"${BUILDER_NAME}\",\"spec\":{\"templateRef\":\"builder-small\",\"mode\":\"ephemeral\"}}" \
+    -d "{\"name\":\"${BUILDER_NAME}\",\"spec\":{\"templateRef\":\"${BUILDER_TEMPLATE}\",\"mode\":\"${BUILDER_MODE}\"}}" \
     >/dev/null
 
   log "Waiting for builder Ready (up to 15m)"
